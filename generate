@@ -1,0 +1,44 @@
+#!/bin/bash
+set -e
+lib_path="/Users/rs/code/SSL_CERT_GENERATOR"
+machine_ip="$(ipconfig getifaddr en0)"
+addr="elife.mac"
+dns=${1:-$addr}
+ip=${2:-$machine_ip}
+dns_2="www.${dns}"
+request_path=""
+
+if [[ $PWD != $lib_path ]];
+    then
+        request_path=$PWD
+fi
+
+sed -E -i'.bak' "s/(IP.2=).+/IP.2=${ip}/g" $lib_path/server.csr.cnf
+
+sed -E -i'.bak' "s/(DNS.1=).*/DNS.1=${dns}/g" $lib_path/server.csr.cnf
+
+sed -E -i'.bak' "s/(DNS.2=).*/DNS.2=www.${dns}/g" $lib_path/server.csr.cnf
+
+sed -E -i'.bak' "s/(CN=).*/CN=${dns}/g"  $lib_path/server.csr.cnf
+
+echo "updated server config"
+sed -E -i'.bak' "s/(IP.2=).+/IP.2=${ip}/g" $lib_path/v3.ext
+sed -E -i'.bak' "s/(DNS.1=).*/DNS.1=${dns}/g" $lib_path/v3.ext
+sed -E -i'.bak' "s/(DNS.2=).*/DNS.2=www.${dns}/g" $lib_path/v3.ext
+echo "updated server ext file"
+cd $lib_path
+
+openssl req -new -sha256 -nodes -out server.csr -newkey rsa:2048 -keyout server.key -config <( cat server.csr.cnf )
+openssl x509 -req -in server.csr -CA rootCA.pem -CAkey rootCA.key -CAcreateserial -out server.crt -days 500 -sha256 -extfile v3.ext
+echo "certificate is ready for ${dns} - ${ip}"
+
+function replicate_cert(){
+    mkdir -p "$request_path/cert"
+    cp "$lib_path/server.crt" "$request_path/cert/server.crt"
+    cp "$lib_path/server.key" "$request_path/cert/server.key"
+}
+
+if [[ ! -z "$request_path" ]];
+    then
+    replicate_cert
+fi
