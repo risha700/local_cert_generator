@@ -1,4 +1,4 @@
-# local_cert_generator
+# local_cert_generator MacOS - Linux
 ## generate root cert first:
 follow: https://github.com/risha700/local-cert-generator
 ## directory structure

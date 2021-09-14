@@ -12,12 +12,12 @@ L=Long Beach
 O=E-LIFEHUB LTD
 OU=77
 emailAddress=info@e-lifehub.com
-CN=hi.com
+CN=test-domain.com
 
 [ alternate_names ]
-DNS.1=hi.com
-DNS.2=www.hi.com
+DNS.1=test-domain.com
+DNS.2=www.test-domain.com
 DNS.3=localhost
 IP.1=127.0.0.1
-IP.2=192.168.1.129
+IP.2=192.192.111.222
 IP.3=::1

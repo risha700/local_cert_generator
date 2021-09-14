@@ -4,9 +4,9 @@ keyUsage=digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 subjectAltName=@alt_names
 
 [alt_names]
-DNS.1=hi.com
-DNS.2=www.hi.com
+DNS.1=test-domain.com
+DNS.2=www.test-domain.com
 DNS.3=localhost
 IP.1=127.0.0.1
-IP.2=192.168.1.129
+IP.2=192.192.111.222
 IP.3=::1

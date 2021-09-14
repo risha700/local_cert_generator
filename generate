@@ -42,3 +42,5 @@ if [[ ! -z "$request_path" ]];
     then
     replicate_cert
 fi
+
+rm *.bak
