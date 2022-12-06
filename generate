@@ -7,25 +7,43 @@ dns=${1:-$addr}
 ip=${2:-$machine_ip}
 dns_2="www.${dns}"
 request_path=""
-
+function add(){ 
+    echo $1 + $2 | bc 
+    }
+# dns_arr=( ${dns//,/ } )
+declare -a dns_arr=( $(echo $dns | tr "," " ") ) 
+len=$(echo ${#dns_arr[@]})
 if [[ $PWD != $lib_path ]];
     then
         request_path=$PWD
 fi
+for idx in $(seq 0 $len)
+do
+next_id=$( add $idx 2 )
+next_id2=$( add $idx 3 )
 
+domain=${dns_arr[idx]}
+if [[ -n $domain ]];then
+if [[ $idx -eq 0 ]];then
+echo "got domain $domain in zero"
 sed -E -i'.bak' "s/(IP.2=).+/IP.2=${ip}/g" $lib_path/server.csr.cnf
+sed -E -i'.bak' "s/(DNS.1=).+/DNS.1=${domain}/g" $lib_path/server.csr.cnf
+sed -E -i'.bak' "s/(DNS.2=).+/DNS.2=www.${domain}/g" $lib_path/server.csr.cnf
 
-sed -E -i'.bak' "s/(DNS.1=).*/DNS.1=${dns}/g" $lib_path/server.csr.cnf
-
-sed -E -i'.bak' "s/(DNS.2=).*/DNS.2=www.${dns}/g" $lib_path/server.csr.cnf
-
-sed -E -i'.bak' "s/(CN=).*/CN=${dns}/g"  $lib_path/server.csr.cnf
-
-echo "updated server config"
 sed -E -i'.bak' "s/(IP.2=).+/IP.2=${ip}/g" $lib_path/v3.ext
-sed -E -i'.bak' "s/(DNS.1=).*/DNS.1=${dns}/g" $lib_path/v3.ext
-sed -E -i'.bak' "s/(DNS.2=).*/DNS.2=www.${dns}/g" $lib_path/v3.ext
-echo "updated server ext file"
+sed -E -i'.bak' "s/(DNS.1=).+/DNS.1=${domain}/g" $lib_path/v3.ext
+sed -E -i'.bak' "s/(DNS.2=).+/DNS.2=www.${domain}/g" $lib_path/v3.ext
+
+sed -E -i'.bak' "s/(CN=).*/CN=${domain}/g"  $lib_path/server.csr.cnf
+else
+echo "got domain $domain in count idx $idx next_id $next_id next_id2 $next_id2 "
+sed -E -i'.bak' "s/(DNS.${next_id}=).*/DNS.${next_id}=${domain}/g" $lib_path/server.csr.cnf
+sed -E -i'.bak' "s/(DNS.${next_id2}=).*/DNS.${next_id2}=${domain}/g" $lib_path/v3.ext
+fi
+
+fi
+done
+
 cd $lib_path
 
 openssl req -new -sha256 -nodes -out server.csr -newkey rsa:2048 -keyout server.key -config <( cat server.csr.cnf )
@@ -43,4 +61,4 @@ if [[ ! -z "$request_path" ]];
     replicate_cert
 fi
 
-rm *.bak
+# rm *.bak
